@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#10243d">
+<title>Desafio dos Recipientes | Laboratório 3D</title>
+<style>
+:root{--navy:#10243d;--blue:#168bd2;--cyan:#59d5e8;--ink:#172b43;--muted:#62748a;--paper:#f3f7fb;--line:#dce6ef;--white:#fff;--green:#17875d;--orange:#ed9c35}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(115deg,#10243d,#174d73);color:white;padding:22px clamp(16px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:13px}.logo{width:44px;height:44px;border-radius:13px;background:#ffffff18;display:grid;place-items:center;font-size:25px}
+h1{font-size:clamp(20px,3vw,28px);margin:0}.tagline{margin:4px 0 0;color:#c7d9e8;font-size:13px}
+nav{display:flex;gap:8px;flex-wrap:wrap}nav button{border:1px solid #ffffff45;background:#ffffff12;color:white;padding:9px 13px;border-radius:10px;cursor:pointer;font-weight:650}nav button.active,nav button:hover{background:white;color:var(--navy)}
+main{max-width:1400px;margin:auto;padding:24px clamp(12px,3vw,36px) 48px}.intro{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:18px;flex-wrap:wrap}.intro h2{margin:0 0 5px;font-size:clamp(22px,3vw,30px)}.intro p{margin:0;color:var(--muted);max-width:720px;line-height:1.5}
+.pill{display:inline-flex;align-items:center;gap:6px;background:#e2f4fb;color:#11658e;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:750}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.85fr);gap:18px;align-items:start}
+.panel{background:white;border:1px solid var(--line);border-radius:18px;box-shadow:0 5px 22px #18344d0a;overflow:hidden}.panel-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}.panel-head h3{margin:0;font-size:16px}.panel-body{padding:17px}
+#sceneWrap{height:440px;position:relative;background:radial-gradient(ellipse at 50% 35%,#f7fcff,#e5f0f8 72%);overflow:hidden}#scene{width:100%;height:100%;display:block}
+.scene-help{position:absolute;bottom:12px;left:12px;background:#ffffffd9;border:1px solid #dbe7f0;padding:7px 10px;border-radius:9px;font-size:11px;color:#53677b;pointer-events:none}
+.scene-label{position:absolute;top:12px;left:12px;background:#ffffffdf;padding:8px 11px;border-radius:10px;font-size:12px;font-weight:750}
+.select-wrap{display:flex;align-items:center;gap:8px}.select-wrap label{font-size:12px;color:var(--muted);font-weight:700}.select-wrap select,select,input[type=number]{border:1px solid var(--line);border-radius:9px;padding:9px;background:white;color:var(--ink);font:inherit}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.control{background:#f7fafc;border:1px solid #e6edf3;padding:12px;border-radius:12px}.control label{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:750;margin-bottom:9px}.control input[type=range]{width:100%;accent-color:var(--blue)}.control small{color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.btn{border:0;border-radius:10px;padding:11px 15px;font-weight:750;cursor:pointer;background:#eaf1f7;color:var(--ink)}.btn.primary{background:var(--blue);color:white}.btn.dark{background:var(--navy);color:white}.btn:disabled{opacity:.45;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}.stat{background:#f5f9fc;border:1px solid #e4edf4;border-radius:12px;padding:11px}.stat span{display:block;color:var(--muted);font-size:11px;font-weight:700}.stat strong{display:block;margin-top:4px;font-size:19px;font-variant-numeric:tabular-nums}
+.side-stack{display:grid;gap:18px}.vessel-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.vessel{border:1px solid var(--line);background:white;padding:10px;border-radius:11px;text-align:left;cursor:pointer}.vessel b{display:block;font-size:13px}.vessel small{color:var(--muted)}.vessel.selected{border:2px solid var(--blue);background:#eff9ff;padding:9px}
+.explain{font-size:13px;line-height:1.55;color:#52667a;background:#f4f9fc;border-radius:12px;padding:12px;margin-top:12px}.explain strong{color:var(--ink)}
+.progress{height:9px;background:#e8eff5;border-radius:99px;overflow:hidden;margin-top:8px}.progress div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width .15s}
+.tab-section{display:none}.tab-section.active{display:block}
+.quiz-q{font-weight:750;line-height:1.45;margin:0 0 14px}.answers{display:grid;gap:8px}.answer{border:1px solid var(--line);border-radius:11px;padding:12px;text-align:left;background:white;cursor:pointer;color:var(--ink)}.answer:hover{border-color:var(--blue)}.answer.correct{border-color:#55b58d;background:#edfaf4}.answer.wrong{border-color:#e28b8b;background:#fff2f2}.feedback{margin-top:12px;padding:12px;border-radius:11px;font-size:13px;line-height:1.5;display:none}.feedback.show{display:block}.feedback.good{background:#eaf8f1;color:#176c4b}.feedback.bad{background:#fff4e9;color:#87521a}
+.compare-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.compare-card{border:1px solid var(--line);border-radius:14px;padding:14px}.compare-card h4{margin:0 0 8px}.compare-card select{width:100%}.compare-bars{display:grid;gap:10px;margin-top:16px}.bar-row{display:grid;grid-template-columns:100px 1fr 55px;align-items:center;gap:8px;font-size:12px}.bar{height:12px;border-radius:99px;background:#e8eff5;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#168bd2,#59d5e8);border-radius:99px}
+.note{font-size:13px;color:var(--muted);line-height:1.6}.formula{background:#10243d;color:white;border-radius:12px;padding:14px;line-height:1.8;font-size:14px}.formula code{color:#8ce5f1}.footer{text-align:center;color:#718195;font-size:12px;padding:24px 10px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}#sceneWrap{height:370px}.side-stack{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){header{padding:16px}.side-stack{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}.stat strong{font-size:16px}.compare-grid{grid-template-columns:1fr}#sceneWrap{height:330px}.panel-head{align-items:flex-start;flex-direction:column}.select-wrap{width:100%;justify-content:space-between}.select-wrap select{max-width:65%}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="logo">💧</div><div><h1>Desafio dos Recipientes</h1><p class="tagline">Um laboratório virtual de geometria, volume e água</p></div></div>
+ <nav><button class="active" data-tab="lab">Laboratório 3D</button><button data-tab="compare">Comparar</button><button data-tab="quiz">Desafios</button><button data-tab="learn">Aprenda</button></nav>
+</header>
+<main>
+<section id="lab" class="tab-section active">
+ <div class="intro"><div><h2>Experimente os formatos</h2><p>Escolha um recipiente, controle a entrada de água e observe como o nível muda. Arraste a cena para girar e use a roda do mouse para aproximar.</p></div><span class="pill">● Simulação interativa</span></div>
+ <div class="layout">
+  <div class="panel">
+   <div class="panel-head"><h3>Visualização tridimensional</h3><div class="select-wrap"><label for="shapeSelect">RECIPIENTE</label><select id="shapeSelect"><option value="cube">Cubo</option><option value="pyramid">Pirâmide (base embaixo)</option><option value="inverted">Pirâmide invertida</option><option value="cylinder">Cilindro</option><option value="cone">Cone</option></select></div></div>
+   <div id="sceneWrap"><canvas id="scene"></canvas><div class="scene-label" id="sceneLabel">Cubo · capacidade 2.000 mL</div><div class="scene-help">↔ Arraste para girar · scroll para zoom</div></div>
+   <div class="panel-body">
+    <div class="controls">
+     <div class="control"><label>Vazão de entrada <strong><span id="flowValue">200</span> mL/min</strong></label><input id="flow" type="range" min="50" max="500" step="25" value="200"><small>Quantidade de água que entra por minuto.</small></div>
+     <div class="control"><label>Volume adicionado <strong><span id="volumeValue">0</span> mL</strong></label><input id="volume" type="range" min="0" max="2000" step="10" value="0"><small>Você também pode mover o controle manualmente.</small></div>
+    </div>
+    <div class="actions"><button class="btn primary" id="startBtn">▶ Iniciar enchimento</button><button class="btn" id="pauseBtn" disabled>Ⅱ Pausar</button><button class="btn dark" id="resetBtn">↺ Reiniciar</button></div>
+    <div class="stats"><div class="stat"><span>VOLUME ATUAL</span><strong id="statVolume">0 mL</strong></div><div class="stat"><span>ALTURA DA ÁGUA</span><strong id="statHeight">0%</strong></div><div class="stat"><span>TEMPO SIMULADO</span><strong id="statTime">0:00</strong></div></div>
+    <div class="progress"><div id="progressBar"></div></div>
+   </div>
+  </div>
+  <aside class="side-stack">
+   <div class="panel"><div class="panel-head"><h3>Escolha um formato</h3></div><div class="panel-body"><div class="vessel-list" id="vesselList">
+    <button class="vessel selected" data-shape="cube"><b>◼ Cubo</b><small>Área constante</small></button>
+    <button class="vessel" data-shape="pyramid"><b>△ Pirâmide</b><small>Base larga</small></button>
+    <button class="vessel" data-shape="inverted"><b>▽ Pirâmide invertida</b><small>Ponta embaixo</small></button>
+    <button class="vessel" data-shape="cylinder"><b>◯ Cilindro</b><small>Área constante</small></button>
+    <button class="vessel" data-shape="cone"><b>△ Cone</b><small>Base circular</small></button>
+   </div><div class="explain" id="shapeExplain"><strong>O que observar:</strong> no cubo, a área horizontal é igual em todas as alturas. Com vazão constante, o nível sobe de maneira uniforme.</div></div></div>
+   <div class="panel"><div class="panel-head"><h3>O que está acontecendo?</h3></div><div class="panel-body"><p class="note" id="liveInsight">A água está no fundo. Inicie o enchimento para observar a relação entre volume e altura.</p><div class="formula">Capacidade total: <code>2.000 mL</code><br>Vazão constante: <code>volume ÷ tempo</code><br>Altura depende da área horizontal.</div></div></div>
+  </aside>
+ </div>
+</section>
+
+<section id="compare" class="tab-section">
+ <div class="intro"><div><h2>Compare dois recipientes</h2><p>Escolha dois formatos e informe um mesmo volume de água. Compare a altura atingida em cada um.</p></div><span class="pill">● Mesmo volume, alturas diferentes</span></div>
+ <div class="panel"><div class="panel-body">
+  <div class="compare-grid"><div class="compare-card"><h4>Recipiente A</h4><select id="compareA"><option value="cube">Cubo</option><option value="pyramid">Pirâmide (base embaixo)</option><option value="inverted">Pirâmide invertida</option><option value="cylinder">Cilindro</option><option value="cone">Cone</option></select><p class="note" id="compareAHeight">Altura: 0%</p></div><div class="compare-card"><h4>Recipiente B</h4><select id="compareB"><option value="pyramid">Pirâmide (base embaixo)</option><option value="cube">Cubo</option><option value="inverted">Pirâmide invertida</option><option value="cylinder">Cilindro</option><option value="cone">Cone</option></select><p class="note" id="compareBHeight">Altura: 0%</p></div></div>
+  <div class="control" style="margin-top:16px"><label>Volume colocado em cada recipiente <strong><span id="compareVolumeLabel">1.000</span> mL</strong></label><input id="compareVolume" type="range" min="0" max="2000" step="10" value="1000"></div>
+  <div class="compare-bars"><div class="bar-row"><b id="barNameA">Cubo</b><div class="bar"><i id="barA"></i></div><strong id="barPctA">50%</strong></div><div class="bar-row"><b id="barNameB">Pirâmide</b><div class="bar"><i id="barB"></i></div><strong id="barPctB">79%</strong></div></div>
+  <div class="explain" id="compareInsight">Com 1.000 mL, compare a altura alcançada em cada formato.</div>
+ </div></div>
+</section>
+
+<section id="quiz" class="tab-section">
+ <div class="intro"><div><h2>Desafios do laboratório</h2><p>Teste suas hipóteses. Leia a explicação após responder e avance para a próxima questão.</p></div><span class="pill">● Conhecimento em prática</span></div>
+ <div class="panel"><div class="panel-body"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><b id="quizCount">Questão 1 de 6</b><b>Pontuação: <span id="score">0</span></b></div><div class="progress"><div id="quizProgress" style="width:16.6%"></div></div><h3 class="quiz-q" id="question" style="margin-top:22px"></h3><div class="answers" id="answers"></div><div class="feedback" id="feedback"></div><div class="actions"><button class="btn primary" id="nextQuestion" disabled>Próxima questão →</button><button class="btn" id="restartQuiz">Recomeçar</button></div></div></div>
+</section>
+
+<section id="learn" class="tab-section">
+ <div class="intro"><div><h2>Entenda a ciência</h2><p>As ideias matemáticas que explicam por que o nível da água não sobe igual em todos os recipientes.</p></div><span class="pill">● Conceitos essenciais</span></div>
+ <div class="layout"><div class="panel"><div class="panel-body">
+  <h3>Volume não é a mesma coisa que altura</h3><p class="note">Volume é o espaço ocupado pela água. Altura é a distância vertical entre o fundo e a superfície da água. Em recipientes com paredes inclinadas, a área disponível para a água muda à medida que o nível sobe.</p>
+  <h3>Por que a pirâmide de base larga enche “mais rápido” no final?</h3><p class="note">Quando a pirâmide está apoiada na base quadrada, sua seção horizontal diminui em direção ao topo. A mesma quantidade de água acrescentada passa a ocupar uma área menor; por isso, a altura aumenta cada vez mais a cada porção de água.</p>
+  <h3>E a pirâmide invertida?</h3><p class="note">Nela acontece o contrário: começa com uma área pequena perto da ponta e fica mais larga conforme sobe. No começo, uma pequena quantidade de água já produz um aumento relativamente grande na altura; depois, o nível sobe mais lentamente.</p>
+  <h3>O tempo total para encher muda?</h3><p class="note">Se os recipientes têm a mesma capacidade e recebem água com a mesma vazão constante, o tempo total é igual. O que muda é a relação entre o volume colocado e a altura atingida durante o processo.</p>
+ </div></div><div class="panel"><div class="panel-head"><h3>Modelo matemático simplificado</h3></div><div class="panel-body">
+  <p class="note">Considere a altura relativa <b>h</b> entre 0 e 1 e o volume relativo <b>V</b> entre 0 e 1.</p>
+  <div class="formula">Cubo / cilindro:<br><code>V = h</code><br><br>Pirâmide / cone com base embaixo:<br><code>V = 1 − (1 − h)³</code><br><br>Pirâmide invertida:<br><code>V = h³</code></div>
+  <p class="note">Essas expressões comparam recipientes de mesma capacidade e altura total. São modelos ideais: não consideram respingos, resistência do fluxo ou deformações.</p>
+ </div></div></div>
+</section>
+<div class="footer">Desafio dos Recipientes · Recurso educativo de Matemática e Ciências · Simulação idealizada</div>
+</main>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+const CAP=2000,H=2;
+const names={cube:'Cubo',pyramid:'Pirâmide (base embaixo)',inverted:'Pirâmide invertida',cylinder:'Cilindro',cone:'Cone'};
+const descriptions={
+ cube:'<strong>O que observar:</strong> no cubo, a área horizontal é igual em todas as alturas. Com vazão constante, o nível sobe de maneira uniforme.',
+ pyramid:'<strong>O que observar:</strong> a pirâmide é larga na base e estreita no topo. A área horizontal diminui à medida que a água sobe, então o nível sobe cada vez mais por porções iguais de água.',
+ inverted:'<strong>O que observar:</strong> a pirâmide invertida começa estreita e fica larga. A área horizontal aumenta com a altura, então o nível sobe bastante no começo e depois mais devagar.',
+ cylinder:'<strong>O que observar:</strong> no cilindro reto, a área horizontal permanece constante. Com vazão constante, o nível sobe de maneira uniforme.',
+ cone:'<strong>O que observar:</strong> como no modelo da pirâmide, o cone tem base larga e ponta no alto. A área da superfície da água diminui à medida que ela sobe.'
+};
+function heightFor(shape,v){const x=Math.max(0,Math.min(1,v/CAP));if(shape==='pyramid'||shape==='cone')return 1-Math.cbrt(1-x);if(shape==='inverted')return Math.cbrt(x);return x}
+function volumeFor(shape,h){const x=Math.max(0,Math.min(1,h));if(shape==='pyramid'||shape==='cone')return CAP*(1-Math.pow(1-x,3));if(shape==='inverted')return CAP*Math.pow(x,3);return CAP*x}
+const canvas=document.querySelector('#scene'),wrap=document.querySelector('#sceneWrap');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(wrap.clientWidth,wrap.clientHeight);renderer.shadowMap.enabled=true;
+const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(35,wrap.clientWidth/wrap.clientHeight,.1,100);camera.position.set(4.5,3.5,5.5);
+const controls={target:new THREE.Vector3(0,1,0),drag:false,lastX:0,lastY:0,theta:.7,phi:1.05,radius:7};
+function updateCamera(){camera.position.set(controls.target.x+controls.radius*Math.sin(controls.phi)*Math.sin(controls.theta),controls.target.y+controls.radius*Math.cos(controls.phi),controls.target.z+controls.radius*Math.sin(controls.phi)*Math.cos(controls.theta));camera.lookAt(controls.target)}
+updateCamera();
+scene.add(new THREE.HemisphereLight(0xffffff,0x9ab2c8,2));const key=new THREE.DirectionalLight(0xffffff,2.2);key.position.set(4,7,5);scene.add(key);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(3.3,64),new THREE.MeshStandardMaterial({color:0xdceaf3,roughness:.9}));floor.rotation.x=-Math.PI/2;floor.position.y=-.04;scene.add(floor);
+const grid=new THREE.GridHelper(5,20,0xb7cbd9,0xd4e1ea);grid.position.y=-.025;scene.add(grid);
+let vesselGroup=new THREE.Group();scene.add(vesselGroup);let waterMesh=null;
+const glass=new THREE.MeshPhysicalMaterial({color:0x9cc9df,transparent:true,opacity:.20,roughness:.12,metalness:0,side:THREE.DoubleSide,depthWrite:false});
+const rimMat=new THREE.MeshStandardMaterial({color:0x397b9e,roughness:.35,metalness:.25});
+const waterMat=new THREE.MeshPhysicalMaterial({color:0x159bd4,transparent:true,opacity:.78,roughness:.18,metalness:.05,clearcoat:.8,side:THREE.DoubleSide});
+function vesselGeometry(shape){
+ if(shape==='pyramid')return new THREE.CylinderGeometry(0,1.42,2,4,1,true);
+ if(shape==='inverted')return new THREE.CylinderGeometry(1.42,0,2,4,1,true);
+ if(shape==='cylinder')return new THREE.CylinderGeometry(1.12,1.12,2,48,1,true);
+ return new THREE.ConeGeometry(1.42,2,48,1,true);
+}
+function makeWater(shape,h){
+ if(h<=.001)return null;
+ if(shape==='cube'){const m=new THREE.Mesh(new THREE.BoxGeometry(1.98,2*h,1.98),waterMat);m.position.y=h;return m}
+ let top=0,bot=0,radial=shape==='cylinder'?48:(shape==='cone'?48:4);
+ if(shape==='pyramid'){bot=1.40;top=1.40*(1-h)}
+ else if(shape==='inverted'){bot=1.40*h;top=1.40}
+ else if(shape==='cylinder'){bot=1.10;top=1.10}
+ else {bot=1.40;top=1.40*(1-h)}
+ const geo=new THREE.CylinderGeometry(top,bot,2*h,radial,1,false);
+ const m=new THREE.Mesh(geo,waterMat);m.position.y=h;return m;
+}
+function setShape(shape){
+ currentShape=shape;vesselGroup.clear();
+ if(shape==='cube'){
+  const wall=new THREE.PlaneGeometry(2,2);
+  const sides=[
+   {x:0,z:-1,ry:0},{x:0,z:1,ry:Math.PI},
+   {x:-1,z:0,ry:-Math.PI/2},{x:1,z:0,ry:Math.PI/2}
+  ];
+  sides.forEach(side=>{const m=new THREE.Mesh(wall,glass);m.position.set(side.x,1,side.z);m.rotation.y=side.ry;vesselGroup.add(m)});
+ } else {
+  const body=new THREE.Mesh(vesselGeometry(shape),glass);body.position.y=1;vesselGroup.add(body);
+ }
+ // Open top rim, plus a visible base outline.
+ const r=shape==='cube'?1.42:(shape==='cylinder'?1.12:1.42);
+ if(shape==='cube'){
+  const pts=[[-1,0,-1],[1,0,-1],[1,0,1],[-1,0,1],[-1,0,-1]].map(p=>new THREE.Vector3(p[0]*1.01,2.01,p[2]*1.01));
+  vesselGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x397b9e})));
+ } else {
+  const points=[];for(let i=0;i<=64;i++){let a=i/64*Math.PI*2;points.push(new THREE.Vector3(Math.cos(a)*r,2.01,Math.sin(a)*r))}
+  vesselGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points),new THREE.LineBasicMaterial({color:0x397b9e})));
+ }
+ const base=new THREE.Mesh(new THREE.CylinderGeometry(r*.98,r*.98,.045,shape==='cube'?4:48),rimMat);base.position.y=.015;vesselGroup.add(base);
+ updateWater();document.querySelector('#sceneLabel').textContent=names[shape]+' · capacidade 2.000 mL';
+ document.querySelector('#shapeExplain').innerHTML=descriptions[shape];
+ document.querySelectorAll('.vessel').forEach(b=>b.classList.toggle('selected',b.dataset.shape===shape));
+ document.querySelector('#shapeSelect').value=shape;
+}
+let currentShape='cube',volume=0,elapsed=0,running=false,lastFrame=0;
+function updateWater(){if(waterMesh){vesselGroup.remove(waterMesh);waterMesh.geometry.dispose();waterMesh=null}const h=H*heightFor(currentShape,volume);waterMesh=makeWater(currentShape,h);if(waterMesh)vesselGroup.add(waterMesh);updateStats()}
+function fmtTime(s){let m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+String(sec).padStart(2,'0')}
+function updateStats(){
+ const h=heightFor(currentShape,volume),pct=h*100;
+ document.querySelector('#volumeValue').textContent=Math.round(volume).toLocaleString('pt-BR');
+ document.querySelector('#volume').value=volume;
+ document.querySelector('#statVolume').textContent=Math.round(volume).toLocaleString('pt-BR')+' mL';
+ document.querySelector('#statHeight').textContent=pct.toFixed(1).replace('.',',')+'%';
+ document.querySelector('#statTime').textContent=fmtTime(elapsed);
+ document.querySelector('#progressBar').style.width=(volume/CAP*100)+'%';
+ document.querySelector('#liveInsight').textContent=volume===0?'A água está no fundo. Inicie o enchimento para observar a relação entre volume e altura.':`Com ${Math.round(volume)} mL adicionados, a água atingiu ${pct.toFixed(1).replace('.',',')}% da altura. ${currentShape==='pyramid'||currentShape==='cone'?'A seção fica menor em direção ao topo, acelerando a subida do nível.':currentShape==='inverted'?'A seção fica maior em direção ao topo, desacelerando a subida do nível.':'A seção horizontal é constante, então a altura cresce proporcionalmente ao volume.'}`;
+}
+function setVolume(v){volume=Math.max(0,Math.min(CAP,Number(v)));updateWater()}
+document.querySelector('#shapeSelect').addEventListener('change',e=>{setShape(e.target.value);});
+document.querySelectorAll('.vessel').forEach(b=>b.addEventListener('click',()=>setShape(b.dataset.shape)));
+document.querySelector('#flow').addEventListener('input',e=>document.querySelector('#flowValue').textContent=e.target.value);
+document.querySelector('#volume').addEventListener('input',e=>{running=false;elapsed=0;document.querySelector('#pauseBtn').disabled=true;document.querySelector('#startBtn').disabled=false;setVolume(e.target.value)});
+document.querySelector('#startBtn').addEventListener('click',()=>{if(volume>=CAP){setVolume(0);elapsed=0}running=true;document.querySelector('#startBtn').disabled=true;document.querySelector('#pauseBtn').disabled=false;lastFrame=performance.now()});
+document.querySelector('#pauseBtn').addEventListener('click',()=>{running=false;document.querySelector('#startBtn').disabled=false;document.querySelector('#pauseBtn').disabled=true});
+document.querySelector('#resetBtn').addEventListener('click',()=>{running=false;elapsed=0;setVolume(0);document.querySelector('#startBtn').disabled=false;document.querySelector('#pauseBtn').disabled=true});
+function animate(t){requestAnimationFrame(animate);if(running){const dt=Math.min((t-lastFrame)/1000,.1);lastFrame=t;elapsed+=dt;setVolume(volume+Number(document.querySelector('#flow').value)*dt/60);if(volume>=CAP){running=false;document.querySelector('#startBtn').disabled=false;document.querySelector('#pauseBtn').disabled=true}}renderer.render(scene,camera)}
+requestAnimationFrame(animate);
+wrap.addEventListener('pointerdown',e=>{controls.drag=true;controls.lastX=e.clientX;controls.lastY=e.clientY;wrap.setPointerCapture(e.pointerId)});
+wrap.addEventListener('pointermove',e=>{if(!controls.drag)return;controls.theta-=(e.clientX-controls.lastX)*.008;controls.phi=Math.max(.25,Math.min(1.48,controls.phi+(e.clientY-controls.lastY)*.008));controls.lastX=e.clientX;controls.lastY=e.clientY;updateCamera()});
+wrap.addEventListener('pointerup',()=>controls.drag=false);wrap.addEventListener('pointercancel',()=>controls.drag=false);
+wrap.addEventListener('wheel',e=>{controls.radius=Math.max(4,Math.min(10,controls.radius+e.deltaY*.006));updateCamera()},{passive:true});
+window.addEventListener('resize',()=>{renderer.setSize(wrap.clientWidth,wrap.clientHeight);camera.aspect=wrap.clientWidth/wrap.clientHeight;camera.updateProjectionMatrix()});
+setShape('cube');
+
+function updateCompare(){
+ const v=Number(document.querySelector('#compareVolume').value),a=document.querySelector('#compareA').value,b=document.querySelector('#compareB').value;
+ const ha=heightFor(a,v)*100,hb=heightFor(b,v)*100;
+ document.querySelector('#compareVolumeLabel').textContent=v.toLocaleString('pt-BR');
+ document.querySelector('#compareAHeight').textContent='Altura: '+ha.toFixed(1).replace('.',',')+'%';
+ document.querySelector('#compareBHeight').textContent='Altura: '+hb.toFixed(1).replace('.',',')+'%';
+ document.querySelector('#barNameA').textContent=names[a].replace(' (base embaixo)','');
+ document.querySelector('#barNameB').textContent=names[b].replace(' (base embaixo)','');
+ document.querySelector('#barA').style.width=ha+'%';document.querySelector('#barB').style.width=hb+'%';
+ document.querySelector('#barPctA').textContent=ha.toFixed(0)+'%';document.querySelector('#barPctB').textContent=hb.toFixed(0)+'%';
+ let insight=ha>hb?`${names[a]} apresenta maior altura com o mesmo volume de água.`:hb>ha?`${names[b]} apresenta maior altura com o mesmo volume de água.`:'Os dois recipientes apresentam a mesma altura relativa para esse volume.';
+ if(v===0)insight='Ainda não há água nos recipientes. Aumente o volume para comparar.';if(v===CAP)insight='Os dois recipientes estão cheios: ambos atingiram 100% da altura e da capacidade.';
+ document.querySelector('#compareInsight').textContent=insight+' Isso não significa que um tenha recebido mais água: o volume é igual nos dois.';
+}
+['compareA','compareB','compareVolume'].forEach(id=>document.getElementById(id).addEventListener('input',updateCompare));updateCompare();
+
+const questions=[
+ {q:'Dois recipientes têm a mesma capacidade e recebem água com a mesma vazão constante. Qual afirmação é correta?',a:['O recipiente mais estreito sempre termina primeiro.','Os dois levam o mesmo tempo para encher completamente.','O recipiente mais alto sempre recebe mais água.'],c:1,e:'Se a capacidade e a vazão são iguais, o tempo total é capacidade ÷ vazão. O formato altera a altura durante o enchimento, não o tempo total.'},
+ {q:'Em uma pirâmide com a base apoiada embaixo, o que acontece com a área horizontal conforme a água sobe?',a:['Diminui.','Aumenta.','Permanece igual.'],c:0,e:'A pirâmide afunila em direção ao topo. Cada camada horizontal é menor que a camada abaixo.'},
+ {q:'Por que o nível da água sobe cada vez mais rápido na pirâmide de base larga?',a:['Porque a água fica mais leve.','Porque a área da superfície diminui conforme sobe.','Porque a vazão aumenta sozinha.'],c:1,e:'A mesma quantidade adicional de água ocupa uma área menor perto do topo, produzindo um aumento maior na altura.'},
+ {q:'Qual recipiente tende a apresentar subida uniforme do nível quando recebe vazão constante?',a:['Cubo ou cilindro reto.','Pirâmide de base larga.','Pirâmide invertida.'],c:0,e:'Cubo e cilindro reto têm área horizontal constante ao longo da altura.'},
+ {q:'O que acontece na pirâmide invertida, com a ponta para baixo?',a:['A área horizontal aumenta com a altura e o nível sobe mais devagar.','A área diminui e o nível sobe cada vez mais rápido.','A água não consegue subir.'],c:0,e:'Na pirâmide invertida, as seções horizontais ficam maiores em direção ao topo. Por isso, a mesma porção de água provoca um aumento menor na altura.'},
+ {q:'Se dois recipientes mostram alturas diferentes após receberem 1 litro, isso significa que...',a:['Um recebeu mais água.','A forma e a área horizontal influenciam a altura atingida.','Um deles tem necessariamente maior capacidade.'],c:1,e:'O volume colocado é o mesmo. A diferença de altura acontece porque a geometria distribui esse volume em áreas horizontais diferentes.'}
+];
+let qi=0,score=0,answered=false;
+function renderQuestion(){const q=questions[qi];answered=false;document.querySelector('#quizCount').textContent=`Questão ${qi+1} de ${questions.length}`;document.querySelector('#quizProgress').style.width=((qi+1)/questions.length*100)+'%';document.querySelector('#question').textContent=q.q;document.querySelector('#answers').innerHTML='';q.a.forEach((a,i)=>{const b=document.createElement('button');b.className='answer';b.textContent=String.fromCharCode(65+i)+') '+a;b.addEventListener('click',()=>answer(i));document.querySelector('#answers').appendChild(b)});const f=document.querySelector('#feedback');f.className='feedback';f.textContent='';document.querySelector('#nextQuestion').disabled=true;document.querySelector('#nextQuestion').textContent=qi===questions.length-1?'Ver resultado':'Próxima questão →'}
+function answer(i){if(answered)return;answered=true;const q=questions[qi],buttons=[...document.querySelectorAll('.answer')];buttons.forEach((b,j)=>{b.disabled=true;if(j===q.c)b.classList.add('correct');if(j===i&&i!==q.c)b.classList.add('wrong')});const ok=i===q.c;if(ok)score++;document.querySelector('#score').textContent=score;const f=document.querySelector('#feedback');f.className='feedback show '+(ok?'good':'bad');f.innerHTML=(ok?'<b>Correto!</b> ':'<b>Vamos entender:</b> ')+q.e;document.querySelector('#nextQuestion').disabled=false}
+document.querySelector('#nextQuestion').addEventListener('click',()=>{if(qi<questions.length-1){qi++;renderQuestion()}else{document.querySelector('#question').textContent=`Você concluiu! Sua pontuação foi ${score} de ${questions.length}.`;document.querySelector('#answers').innerHTML='';const f=document.querySelector('#feedback');f.className='feedback show good';f.textContent=score===questions.length?'Excelente! Você dominou os conceitos principais.':'Muito bem! Revise a seção Aprenda e tente novamente para melhorar sua pontuação.';document.querySelector('#nextQuestion').disabled=true;document.querySelector('#nextQuestion').textContent='Concluído'}})
+document.querySelector('#restartQuiz').addEventListener('click',()=>{qi=0;score=0;document.querySelector('#score').textContent='0';renderQuestion()});renderQuestion();
+
+document.querySelectorAll('nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b===btn));document.querySelectorAll('.tab-section').forEach(s=>s.classList.toggle('active',s.id===btn.dataset.tab));if(btn.dataset.tab==='lab'){setTimeout(()=>{renderer.setSize(wrap.clientWidth,wrap.clientHeight);camera.aspect=wrap.clientWidth/wrap.clientHeight;camera.updateProjectionMatrix()},30)}}));
+</script>
+</body>
+</html>
